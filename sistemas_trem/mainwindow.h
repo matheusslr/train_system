@@ -14,8 +14,10 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     void paintEvent(QPaintEvent *event);
+
     ~MainWindow();
 public slots:
+    void move();
 
 private:
     Ui::MainWindow *ui;

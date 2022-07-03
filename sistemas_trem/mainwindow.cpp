@@ -8,7 +8,7 @@
 #include <QPen>
 #include <QPainter>
 #include <QBrush>
-
+#include <QTimer>
 using namespace std;
 
 Trail trilho(
@@ -28,6 +28,8 @@ Trem trem(
         trilho.y,   /* pos_y do trilho a qual o trem pertence */
         25,         /* larg */
         25,         /* alt */
+        trilho.largura,/* larg trilho*/
+        trilho.altura, /* alt trilho */
         0,          /* r */
         255,        /* g */
         0,          /* b */
@@ -39,6 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(move()));
+    timer->setInterval(200); // 200 milissegundos
+    timer->start(); // Se preferir, pode usar start(200) e remover a linha do setInterval
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
@@ -59,6 +65,12 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     painter.drawRect(trem.x,trem.y-trem.altura/2,trem.largura,trem.altura);      // pode andar de x ate x+larg
 
+}
+
+void MainWindow::move()
+{
+    trem.move();
+    repaint();
 }
 
 MainWindow::~MainWindow()
