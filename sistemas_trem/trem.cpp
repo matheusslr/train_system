@@ -27,7 +27,7 @@ void Trem::move()
         case 0:
             if((this->x + this->velocidade) < (this->x_trilho + this->largura_trilho-this->largura/2))
             {
-                this->x+=20;
+                this->x+=this->velocidade;
             }else
             {
                 this->x =this->x_trilho + this->largura_trilho-this->largura/2;
@@ -37,7 +37,7 @@ void Trem::move()
         case 1:
             if((this->y + this->velocidade) < (this->y_trilho + this->altura_trilho-this->altura/2))
             {
-                this->y+=20;
+                this->y+=this->velocidade;
             }else
             {
                 this->y = this->y_trilho + this->altura_trilho;
@@ -47,7 +47,7 @@ void Trem::move()
         case 2:
             if((this->x - this->velocidade) > (this->x_trilho-this->largura/2))
             {
-                this->x-=20;
+                this->x-=this->velocidade;
             }else
             {
                 this->x =this->x_trilho-this->largura/2;
@@ -57,16 +57,18 @@ void Trem::move()
         case 3:
             if((this->y - this->velocidade) > (this->y_trilho - this->altura/2))
             {
-                this->y-=20;
+                this->y-=this->velocidade;
             }else
             {
                 this->y = this->y_trilho;
                 this->movimento = 0;
             }
             break;
-
-
     }
 
+}
 
+void Trem::setVel(int vel)
+{
+    this->velocidade = vel;
 }
