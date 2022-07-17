@@ -1,7 +1,6 @@
 #include "trem.h"
 #include "trail.h"
 
-
 Trem::Trem(int x, int y,int x_trilho, int y_trilho, int largura, int altura, int largura_trilho, int altura_trilho,int r, int g, int b, bool status=0)
 {
     this->x = x;
@@ -71,4 +70,9 @@ void Trem::move()
 void Trem::setVel(int vel)
 {
     this->velocidade = vel;
+}
+
+void Trem::run()
+{
+    move();
 }

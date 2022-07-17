@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "trem.h"
 #include "trail.h"
+#include <semaphore.h>
 
 #include <QDebug>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include <QPainter>
 #include <QBrush>
 #include <QTimer>
+#include <QThread>
 using namespace std;
 
 Trail trilho(
@@ -78,8 +80,8 @@ Trem trem3(
         trilho3.y,   /* pos_y do trilho a qual o trem pertence */
         25,         /* larg */
         25,         /* alt */
-        trilho2.largura,/* larg trilho*/
-        trilho2.altura, /* alt trilho */
+        trilho3.largura,/* larg trilho*/
+        trilho3.altura, /* alt trilho */
         0,          /* r */
         0,          /* g */
         255,        /* b */
@@ -103,13 +105,30 @@ Trem trem4(
         trilho4.y,   /* pos_y do trilho a qual o trem pertence */
         25,         /* larg */
         25,         /* alt */
-        trilho2.largura,/* larg trilho*/
-        trilho2.altura, /* alt trilho */
+        trilho4.largura,/* larg trilho*/
+        trilho4.altura, /* alt trilho */
         255,        /* r */
         255,        /* g */
         0,          /* b */
         0           /* status */
     );
+
+Trem *mthread = new Trem(
+            trilho4.x,        /* x */
+            trilho4.y,        /* y */
+            trilho4.x,   /* pos_x do trilho a qual o trem pertence */
+            trilho4.y,   /* pos_y do trilho a qual o trem pertence */
+            15,         /* larg */
+            15,         /* alt */
+            trilho2.largura,/* larg trilho*/
+            trilho2.altura, /* alt trilho */
+            0,        /* r */
+            255,        /* g */
+            0,          /* b */
+            0           /* status */
+    );
+
+sem_t sem1;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -120,6 +139,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(move()));
     timer->setInterval(200); // 200 milissegundos
     timer->start(); // Se preferir, pode usar start(200) e remover a linha do setInterval
+
+    sem_init(&sem1,0,1);
+    mthread->start();
+    sem_destroy(&sem1);
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
@@ -180,10 +203,24 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     painter.drawRect(trem4.x,trem4.y-trem4.altura/2,trem4.largura,trem4.altura);      // pode andar de x ate x+larg
 
+    painter.setBrush(Qt::NoBrush);
+    brush.setStyle(Qt::SolidPattern);
+    brush.setColor(QColor(mthread->r,mthread->g,mthread->b));
+    painter.setBrush(brush);
+    pen.setColor(QColor(mthread->r,mthread->g,mthread->b));
+    painter.setPen(pen);
+    painter.drawRect(mthread->x,mthread->y-mthread->altura/2,mthread->largura,mthread->altura);      // pode andar de x ate x+larg
+
 }
 
 void MainWindow::move()
 {
+    qDebug() << "antes\n";
+    sem_wait(&sem1);
+    qDebug() << "depois\n";
+    QThread::msleep(1000);
+    sem_post(&sem1);
+
     int vel = ui->sliderVel1->value();
     trem.setVel(vel);
     trem.move();
@@ -200,6 +237,8 @@ void MainWindow::move()
     trem4.setVel(vel4);
     trem4.move();
 
+    mthread->setVel(vel2);
+    mthread->move();
     repaint();
 }
 
