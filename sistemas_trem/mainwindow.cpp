@@ -11,6 +11,9 @@
 #include <QBrush>
 #include <QTimer>
 #include <QThread>
+
+#include <pthread.h>
+#include <semaphore.h>
 using namespace std;
 
 Trail trilho(
@@ -128,7 +131,7 @@ Trem *mthread = new Trem(
             0           /* status */
     );
 
-sem_t sem1;
+//sem_t sem1;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -140,9 +143,12 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->setInterval(200); // 200 milissegundos
     timer->start(); // Se preferir, pode usar start(200) e remover a linha do setInterval
 
-    sem_init(&sem1,0,1);
-    mthread->start();
-    sem_destroy(&sem1);
+     pthread_t thread1;
+    pthread_create(&thread1, NULL, MainWindow::trem_1,(void*)this);
+
+    // sem_init(&sem1,0,1);
+     mthread->start();
+   // sem_destroy(&sem1);
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
@@ -213,17 +219,27 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
 }
 
+void *MainWindow::trem_1(void *arg)
+{
+    qDebug()<<"okay"<<endl;
+    while(1)
+    {
+        trem.move();
+        QThread::msleep(200);
+    }
+}
+
 void MainWindow::move()
 {
-    qDebug() << "antes\n";
-    sem_wait(&sem1);
-    qDebug() << "depois\n";
-    QThread::msleep(1000);
-    sem_post(&sem1);
+    //qDebug() << "antes\n";
+   // sem_wait(&sem1);
+    //qDebug() << "depois\n";
+    //QThread::msleep(1000);
+    //sem_post(&sem1);
 
     int vel = ui->sliderVel1->value();
     trem.setVel(vel);
-    trem.move();
+    //trem.move();
 
     int vel2 = ui->sliderVel2->value();
     trem2.setVel(vel2);
@@ -237,9 +253,10 @@ void MainWindow::move()
     trem4.setVel(vel4);
     trem4.move();
 
-    mthread->setVel(vel2);
-    mthread->move();
+    //mthread->setVel(vel2);
+    //mthread->move();
     repaint();
+
 }
 
 MainWindow::~MainWindow()
