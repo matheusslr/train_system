@@ -116,22 +116,11 @@ Trem trem4(
         0           /* status */
     );
 
-Trem *mthread = new Trem(
-            trilho4.x,        /* x */
-            trilho4.y,        /* y */
-            trilho4.x,   /* pos_x do trilho a qual o trem pertence */
-            trilho4.y,   /* pos_y do trilho a qual o trem pertence */
-            15,         /* larg */
-            15,         /* alt */
-            trilho2.largura,/* larg trilho*/
-            trilho2.altura, /* alt trilho */
-            0,        /* r */
-            255,        /* g */
-            0,          /* b */
-            0           /* status */
-    );
 
-//sem_t sem1;
+
+sem_t semL3;
+
+sem_t semL4;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -140,15 +129,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(move()));
-    timer->setInterval(200); // 200 milissegundos
+    timer->setInterval(20); // 200 milissegundos
     timer->start(); // Se preferir, pode usar start(200) e remover a linha do setInterval
 
-     pthread_t thread1;
+    sem_init(&semL3, 0, 1);
+    sem_init(&semL4, 0, 1);
+    pthread_t thread1,thread2,thread3,thread4;
     pthread_create(&thread1, NULL, MainWindow::trem_1,(void*)this);
+    pthread_create(&thread2, NULL, MainWindow::trem_2,(void*)this);
+    pthread_create(&thread3, NULL, MainWindow::trem_3,(void*)this);
+    pthread_create(&thread4, NULL, MainWindow::trem_4,(void*)this);
 
-    // sem_init(&sem1,0,1);
-     mthread->start();
-   // sem_destroy(&sem1);
+
+
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
@@ -209,22 +202,141 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     painter.drawRect(trem4.x,trem4.y-trem4.altura/2,trem4.largura,trem4.altura);      // pode andar de x ate x+larg
 
-    painter.setBrush(Qt::NoBrush);
-    brush.setStyle(Qt::SolidPattern);
-    brush.setColor(QColor(mthread->r,mthread->g,mthread->b));
-    painter.setBrush(brush);
-    pen.setColor(QColor(mthread->r,mthread->g,mthread->b));
-    painter.setPen(pen);
-    painter.drawRect(mthread->x,mthread->y-mthread->altura/2,mthread->largura,mthread->altura);      // pode andar de x ate x+larg
+
 
 }
 
 void *MainWindow::trem_1(void *arg)
 {
+
+    while(1)
+    {
+
+
+
+        if(trem.getTrilho()==1)
+        {
+
+            sem_wait(&semL3);
+
+            while(1)
+            {
+                trem.move();
+                if(trem.getTrilho()==2)
+                {
+                    break;
+                }
+
+                QThread::msleep(20);
+
+            }
+
+            sem_post(&semL3);
+
+        }else if(trem.getTrilho()==2)
+        {
+            sem_wait(&semL4);
+            qDebug()<<"regiao critica l4 1"<<endl;
+
+            while(1)
+            {
+                trem.move();
+                if(trem.getTrilho()==3) break;
+                 QThread::msleep(20);
+            }
+             sem_post(&semL4);
+
+        }else
+        {
+            while(1)
+            {
+                trem.move();
+                if(trem.getTrilho()==1) break;
+                 QThread::msleep(20);
+            }
+        }
+
+
+    }
+
+
+}
+void *MainWindow::trem_2(void *arg)
+{
+    while(1)
+    {
+    if(trem2.getTrilho()==3)
+    {
+        sem_wait(&semL3);
+        while(1)
+        {
+            trem2.move();
+            qDebug()<<"regiao critica 2"<<endl;
+            if(trem2.getTrilho()==0)
+            {
+                break;
+            }
+            QThread::msleep(200);
+
+        }
+        sem_post(&semL3);
+    }else
+    {
+        while(1)
+        {
+             trem2.move();
+             if(trem2.getTrilho()==3)
+             {
+                 break;
+             }
+             QThread::msleep(200);
+
+        }
+
+    }
+    }
+}
+void *MainWindow::trem_3(void *arg)
+{
+    while(1)
+    {
+        if(trem3.getTrilho()==0)
+        {
+            sem_wait(&semL4);
+             qDebug()<<"regiao critica l4 3"<<endl;
+            while(1)
+            {
+                trem3.move();
+                if(trem3.getTrilho()==1)
+                {
+                    break;
+                }
+                QThread::msleep(200);
+
+            }
+            sem_post(&semL4);
+        }else
+        {
+            while(1)
+            {
+                 trem3.move();
+                 if(trem3.getTrilho()==0)
+                 {
+                     break;
+                 }
+                 QThread::msleep(200);
+
+            }
+
+        }
+    }
+}
+void *MainWindow::trem_4(void *arg)
+{
     qDebug()<<"okay"<<endl;
     while(1)
     {
-        trem.move();
+        trem4.move();
         QThread::msleep(200);
     }
 }
@@ -239,22 +351,21 @@ void MainWindow::move()
 
     int vel = ui->sliderVel1->value();
     trem.setVel(vel);
-    //trem.move();
+
 
     int vel2 = ui->sliderVel2->value();
     trem2.setVel(vel2);
-    trem2.move();
+
 
     int vel3 = ui->sliderVel3->value();
     trem3.setVel(vel3);
-    trem3.move();
+
 
     int vel4 = ui->sliderVel4->value();
     trem4.setVel(vel4);
-    trem4.move();
 
-    //mthread->setVel(vel2);
-    //mthread->move();
+
+
     repaint();
 
 }

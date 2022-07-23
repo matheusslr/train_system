@@ -4,7 +4,7 @@
 #include "trail.h"
 #include <QtCore>
 
-class Trem : public QThread
+class Trem
 {   
 public:
     int x, y;
@@ -17,7 +17,8 @@ public:
     Trem(int x, int y, int x_trilho, int y_trilho, int largura, int altura,int largura_trilho, int altura_trilho, int r, int g, int b, bool status);
     void move();
     void setVel(int vel);
-    void run();
+    int getTrilho();
+
 };
 
 #endif // TREM_H

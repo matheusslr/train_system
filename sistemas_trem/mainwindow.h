@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void paintEvent(QPaintEvent *event);
     static void* trem_1(void* arg);
+    static void* trem_2(void* arg);
+    static void* trem_3(void* arg);
+    static void* trem_4(void* arg);
 
     ~MainWindow();
 public slots:

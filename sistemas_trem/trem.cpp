@@ -72,11 +72,7 @@ void Trem::setVel(int vel)
     this->velocidade = vel;
 }
 
-void Trem::run()
+int Trem::getTrilho()
 {
-   while(1)
-   {
-       move();
-      QThread::msleep(200);
-    }
+    return this->movimento;
 }

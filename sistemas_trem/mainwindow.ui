@@ -51,7 +51,7 @@
           <string notr="true"/>
          </property>
          <property name="minimum">
-          <number>20</number>
+          <number>1</number>
          </property>
          <property name="maximum">
           <number>100</number>
