@@ -24,7 +24,7 @@ Trail trilho(
         255,        /* r */
         0,          /* g */
         0           /* b */
-    );
+        );
 
 Trem trem(
         trilho.x,        /* x */
@@ -39,7 +39,7 @@ Trem trem(
         0,          /* g */
         0,          /* b */
         0           /* status */
-    );
+        );
 
 Trail trilho2(
         300,         /* x */
@@ -49,7 +49,7 @@ Trail trilho2(
         0,          /* r */
         255,        /* g */
         0           /* b */
-    );
+        );
 
 Trem trem2(
         trilho2.x,        /* x */
@@ -64,7 +64,7 @@ Trem trem2(
         255,        /* g */
         0,          /* b */
         0           /* status */
-    );
+        );
 
 Trail trilho3(
         175,         /* x */
@@ -74,7 +74,7 @@ Trail trilho3(
         0,          /* r */
         0,          /* g */
         255         /* b */
-    );
+        );
 
 Trem trem3(
         trilho3.x,        /* x */
@@ -89,7 +89,7 @@ Trem trem3(
         0,          /* g */
         255,        /* b */
         0           /* status */
-    );
+        );
 
 Trail trilho4(
         300,         /* x */
@@ -99,7 +99,7 @@ Trail trilho4(
         255,        /* r */
         255,        /* g */
         0           /* b */
-    );
+        );
 
 Trem trem4(
         trilho4.x,        /* x */
@@ -114,13 +114,14 @@ Trem trem4(
         255,        /* g */
         0,          /* b */
         0           /* status */
-    );
+        );
 
 
 
 sem_t semL3;
-
 sem_t semL4;
+sem_t semL7;
+sem_t semL9;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -134,13 +135,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     sem_init(&semL3, 0, 1);
     sem_init(&semL4, 0, 1);
+    sem_init(&semL7, 0, 1);
+    sem_init(&semL9, 0, 1);
     pthread_t thread1,thread2,thread3,thread4;
     pthread_create(&thread1, NULL, MainWindow::trem_1,(void*)this);
     pthread_create(&thread2, NULL, MainWindow::trem_2,(void*)this);
     pthread_create(&thread3, NULL, MainWindow::trem_3,(void*)this);
     pthread_create(&thread4, NULL, MainWindow::trem_4,(void*)this);
-
-
 
 }
 
@@ -202,8 +203,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     painter.drawRect(trem4.x,trem4.y-trem4.altura/2,trem4.largura,trem4.altura);      // pode andar de x ate x+larg
 
-
-
 }
 
 void *MainWindow::trem_1(void *arg)
@@ -211,8 +210,6 @@ void *MainWindow::trem_1(void *arg)
 
     while(1)
     {
-
-
 
         if(trem.getTrilho()==1)
         {
@@ -242,58 +239,60 @@ void *MainWindow::trem_1(void *arg)
             {
                 trem.move();
                 if(trem.getTrilho()==3) break;
-                 QThread::msleep(20);
+                QThread::msleep(20);
             }
-             sem_post(&semL4);
+            sem_post(&semL4);
 
         }else
         {
-            while(1)
-            {
-                trem.move();
-                if(trem.getTrilho()==1) break;
-                 QThread::msleep(20);
-            }
+
+            trem.move();
+            QThread::msleep(20);
         }
-
-
     }
 
-
 }
+
 void *MainWindow::trem_2(void *arg)
 {
     while(1)
     {
-    if(trem2.getTrilho()==3)
-    {
-        sem_wait(&semL3);
-        while(1)
+        if(trem2.getTrilho()==3)
+        {
+            sem_wait(&semL3);
+            while(1)
+            {
+                trem2.move();
+                qDebug()<<"regiao critica L3 2"<<endl;
+                if(trem2.getTrilho()==0)
+                {
+                    break;
+                }
+                QThread::msleep(20);
+
+            }
+            sem_post(&semL3);
+        }else if(trem2.getTrilho()==2)
+        {
+            sem_wait(&semL7);
+            while(1)
+            {
+                trem2.move();
+                qDebug()<<"regiao critica L7 2"<<endl;
+                if(trem2.getTrilho()==3)
+                {
+                    break;
+                }
+                QThread::msleep(20);
+
+            }
+            sem_post(&semL7);
+        }
+        else
         {
             trem2.move();
-            qDebug()<<"regiao critica 2"<<endl;
-            if(trem2.getTrilho()==0)
-            {
-                break;
-            }
-            QThread::msleep(200);
-
+            QThread::msleep(20);
         }
-        sem_post(&semL3);
-    }else
-    {
-        while(1)
-        {
-             trem2.move();
-             if(trem2.getTrilho()==3)
-             {
-                 break;
-             }
-             QThread::msleep(200);
-
-        }
-
-    }
     }
 }
 void *MainWindow::trem_3(void *arg)
@@ -303,7 +302,7 @@ void *MainWindow::trem_3(void *arg)
         if(trem3.getTrilho()==0)
         {
             sem_wait(&semL4);
-             qDebug()<<"regiao critica l4 3"<<endl;
+            qDebug()<<"regiao critica l4 3"<<endl;
             while(1)
             {
                 trem3.move();
@@ -311,23 +310,29 @@ void *MainWindow::trem_3(void *arg)
                 {
                     break;
                 }
-                QThread::msleep(200);
+                QThread::msleep(20);
 
             }
             sem_post(&semL4);
-        }else
+        }else if(trem3.getTrilho()==1)
         {
+            sem_wait(&semL9);
+            qDebug() << "região critica l9 3" << endl;
             while(1)
             {
-                 trem3.move();
-                 if(trem3.getTrilho()==0)
-                 {
-                     break;
-                 }
-                 QThread::msleep(200);
-
+                trem3.move();
+                if(trem3.getTrilho()==2)
+                {
+                    break;
+                }
+                QThread::msleep(20);
             }
-
+            sem_post(&semL9);
+        }
+        else
+        {
+            trem3.move();
+            QThread::msleep(20);
         }
     }
 }
@@ -336,35 +341,56 @@ void *MainWindow::trem_4(void *arg)
     qDebug()<<"okay"<<endl;
     while(1)
     {
-        trem4.move();
-        QThread::msleep(200);
+        if(trem4.getTrilho()==3)
+        {
+            sem_wait(&semL9);
+            qDebug() << "regiao critica l9 4" << endl;
+            while(1)
+            {
+                trem4.move();
+                if(trem4.getTrilho()==0)
+                {
+                    break;
+                }
+                QThread::msleep(20);
+            }
+            sem_post(&semL9);
+        }else if(trem4.getTrilho()==0)
+        {
+            sem_wait(&semL7);
+            qDebug() << "regiao critica l7 4" << endl;
+            while(1)
+            {
+                trem4.move();
+                if(trem4.getTrilho()==1)
+                {
+                    break;
+                }
+                QThread::msleep(20);
+            }
+            sem_post(&semL7);
+        }
+        else
+        {
+            trem4.move();
+            QThread::msleep(20);
+        }
     }
 }
 
 void MainWindow::move()
 {
-    //qDebug() << "antes\n";
-   // sem_wait(&sem1);
-    //qDebug() << "depois\n";
-    //QThread::msleep(1000);
-    //sem_post(&sem1);
-
     int vel = ui->sliderVel1->value();
     trem.setVel(vel);
-
 
     int vel2 = ui->sliderVel2->value();
     trem2.setVel(vel2);
 
-
     int vel3 = ui->sliderVel3->value();
     trem3.setVel(vel3);
 
-
     int vel4 = ui->sliderVel4->value();
     trem4.setVel(vel4);
-
-
 
     repaint();
 

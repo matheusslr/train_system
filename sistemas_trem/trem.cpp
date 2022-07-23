@@ -34,7 +34,7 @@ void Trem::move()
             }
             break;
         case 1:
-            if((this->y + this->velocidade) < (this->y_trilho + this->altura_trilho-this->altura/2))
+            if((this->y + this->velocidade) < (this->y_trilho + this->altura_trilho))
             {
                 this->y+=this->velocidade;
             }else
@@ -54,7 +54,7 @@ void Trem::move()
             }
             break;
         case 3:
-            if((this->y - this->velocidade) > (this->y_trilho - this->altura/2))
+            if((this->y - this->velocidade) > (this->y_trilho))
             {
                 this->y-=this->velocidade;
             }else

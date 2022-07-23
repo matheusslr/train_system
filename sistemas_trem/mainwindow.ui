@@ -32,7 +32,7 @@
       <x>140</x>
       <y>299</y>
       <width>291</width>
-      <height>51</height>
+      <height>65</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -54,7 +54,7 @@
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>20</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -64,10 +64,10 @@
        <item row="1" column="1">
         <widget class="QSlider" name="sliderVel3">
          <property name="minimum">
-          <number>20</number>
+          <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>20</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -98,10 +98,10 @@
        <item row="1" column="1">
         <widget class="QSlider" name="sliderVel4">
          <property name="minimum">
-          <number>20</number>
+          <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>20</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -118,10 +118,10 @@
        <item row="0" column="1">
         <widget class="QSlider" name="sliderVel2">
          <property name="minimum">
-          <number>20</number>
+          <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>20</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
